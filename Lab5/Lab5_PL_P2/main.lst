@@ -1,0 +1,568 @@
+
+
+
+ARM Macro Assembler    Page 1 
+
+
+    1 00000000         ; ******************************************************
+                       *****************************
+    2 00000000         ; Nombre : Lab5 - Pregunta 1 GuerreroIsuiza
+    3 00000000         ; Simulador : Periferico Texas Port F, en keil uVision4 
+                       Ver. 4.74 
+    4 00000000         ; Descripción : Leer 2 interruptores y encender 1 led de
+                        acuerdo al enunciado
+    5 00000000         ; Autor : Mateo Guerrero Isuiza
+    6 00000000         ; Fecha : Semestre 2021-2
+    7 00000000         ; Conexiones : SW1 --> PF4
+    8 00000000         ; : SW2 --> PF0
+    9 00000000         ; : LedRojo --> PF1
+   10 00000000         ; : LedAzul --> PF2
+   11 00000000         ; : LedVerde --> PF3
+   12 00000000         ; : Amarillo --> ROJO | VERDE
+   13 00000000         ; : Blanco --> ROJO | VERDE | AZUL
+   14 00000000         ; : Magenta --> ROJO | AZUL
+   15 00000000         ;*******************************************************
+                       *****************************
+   16 00000000         ; DIRECCIONES DE DESPLAZAMIENTO (OFFSET)
+   17 00000000         ; ----------------------------------------
+   18 00000000 000003FC 
+                       DATA    EQU              0x3FC
+   19 00000000 00000400 
+                       DIR     EQU              0x400
+   20 00000000 00000420 
+                       AFSEL   EQU              0x420
+   21 00000000 00000508 
+                       DR8R    EQU              0x508
+   22 00000000 00000510 
+                       PUR     EQU              0x510
+   23 00000000 0000051C 
+                       DEN     EQU              0x51C
+   24 00000000 00000520 
+                       LOCK    EQU              0x520
+   25 00000000 00000524 
+                       CR      EQU              0x524
+   26 00000000         
+   27 00000000         ; ----------------------------------------
+   28 00000000                 AREA             main, READONLY, CODE
+   29 00000000                 THUMB                        ; Uso de instruccio
+                                                            nes THUMB
+   30 00000000                 EXPORT           Start
+   31 00000000         
+   32 00000000         Start
+   33 00000000         ;********** ACTIVAR EL RELOJ DEL PUERTO F *************
+   34 00000000 4843            LDR              R0, RCGCGPIO ; Registro para Ha
+                                                            bilitar los relojes
+                                                             de los puertos GPI
+                                                            O
+   35 00000002 6801            LDR              R1, [R0]
+   36 00000004 F041 0120       ORR              R1, #0x20   ; Seleccionando el 
+                                                            reloj del Puerto F
+   37 00000008 6001            STR              R1, [R0]    ; Cargando el regis
+                                                            tro con la configur
+                                                            ación
+   38 0000000A         
+   39 0000000A BF00            NOP                          ; Esperar que el re
+                                                            loj del puerto F se
+
+
+
+ARM Macro Assembler    Page 2 
+
+
+                                                             active
+   40 0000000C BF00            NOP                          ; NOP = No Operatio
+                                                            n
+   41 0000000E BF00            NOP
+   42 00000010 BF00            NOP
+   43 00000012         ;*******************************************************
+                       
+   44 00000012         ;************ CONFIGURANDO EL PUERTO F *****************
+                       
+   45 00000012 4841            LDR              R0, GPIO_PORTF_BASE ; Dirección
+                                                             Base del puerto F
+   46 00000014 4941            LDR              R1, KEYLOCK ; Offset de la llav
+                                                            e
+   47 00000016 F8C0 1520       STR              R1, [R0,#LOCK] ; Cargando la ll
+                                                            ave en el registro 
+                                                            correspondiente
+   48 0000001A         
+   49 0000001A F8D0 1524       LDR              R1, [R0,#CR]
+   50 0000001E F041 0101       ORR              R1, #0x01
+   51 00000022 F8C0 1524       STR              R1, [R0,#CR] 
+                                                            ; Desbloqueando PF0
+                                                            
+   52 00000026         
+   53 00000026 F8D0 1400       LDR              R1, [R0,#DIR] ; Registro de con
+                                                            figuración de los p
+                                                            uertos de Entrada y
+                                                             Salida
+   54 0000002A F041 010E       ORR              R1, #0x0E   ; Definiendo puerto
+                                                             de Salida, led ROJ
+                                                            O (PF1), led AZUL (
+                                                            PF2) y led Verde (P
+                                                            F3) 
+   55 0000002E F021 0111       BIC              R1, #0x11   ; Definiendo los pu
+                                                            ertos de Entrada, S
+                                                            W1(PF4) y SW2(PF0)
+   56 00000032 F8C0 1400       STR              R1, [R0,#DIR] ; Cargando el reg
+                                                            istro con la config
+                                                            uración
+   57 00000036         
+   58 00000036 F8D0 151C       LDR              R1, [R0,#DEN] ; Registro de hab
+                                                            ilitación de puerto
+                                                             Digital
+   59 0000003A F041 011F       ORR              R1, #0x1F   ; Habilitar los bit
+                                                            s del puerto F que 
+                                                            serán usados
+   60 0000003E F8C0 151C       STR              R1, [R0,#DEN] ; Cargando el reg
+                                                            istro con la config
+                                                            uración
+   61 00000042         
+   62 00000042 F8D0 1508       LDR              R1, [R0,#DR8R] ; Registro de Ha
+                                                            bilitación del driv
+                                                            er de 8mA
+   63 00000046 F041 010E       ORR              R1, #0x0E   ; Puerto de Salida 
+                                                            con el driver de 8m
+                                                            A
+   64 0000004A F8C0 1508       STR              R1, [R0,#DR8R] ; Cargando el re
+                                                            gistro con la confi
+                                                            guración
+   65 0000004E         
+
+
+
+ARM Macro Assembler    Page 3 
+
+
+   66 0000004E F8D0 1510       LDR              R1, [R0,#PUR] ; Registro de Hab
+                                                            ilitación de las re
+                                                            sistencias internas
+                                                             de "pull-up"
+   67 00000052 F041 0111       ORR              R1, #0x11   ; Puertos de Entrad
+                                                            a con la resistenci
+                                                            a de "pull-up"
+   68 00000056 F8C0 1510       STR              R1, [R0,#PUR] ; Cargando el reg
+                                                            istro con la config
+                                                            uración
+   69 0000005A         
+   70 0000005A F8D0 1420       LDR              R1, [R0,#AFSEL] ; Registro de F
+                                                            unciones Alternas
+   71 0000005E F021 011F       BIC              R1, #0x1F   ; Deshabilitar func
+                                                            iones alternas en l
+                                                            os puertos digítale
+                                                            s
+   72 00000062 F8C0 1420       STR              R1, [R0,#AFSEL] ; Cargando el r
+                                                            egistro con la conf
+                                                            iguración
+   73 00000066         
+   74 00000066 F8D0 13FC       LDR              R1, [R0,#DATA] ; Registro de Da
+                                                            tos del puerto F
+   75 0000006A F021 010E       BIC              R1, #0x0E   ; Apagando todos lo
+                                                            s leds
+   76 0000006E F8C0 13FC       STR              R1, [R0,#DATA] ; Cargando el re
+                                                            gistro con la confi
+                                                            guración
+   77 00000072         
+   78 00000072         ; *********** FIN DE LA CONFIGURACIÓN DEL PUERTO F *****
+                       *********
+   79 00000072         
+   80 00000072         
+   81 00000072         Start2
+   82 00000072 F04F 0201       MOV              R2, #1      ; Inicializando el 
+                                                            registro que se usa
+                                                            ra como escalador d
+                                                            el retardo
+   83 00000076         
+   84 00000076         Ciclo
+   85 00000076         
+   86 00000076 4828            LDR              R0, GPIO_PORTF_BASE ; Dirección
+                                                             Base del puerto F
+   87 00000078 F8D0 13FC       LDR              R1, [R0,#DATA] ; Registro de Da
+                                                            tos del puerto F
+   88 0000007C F001 0110       AND              R1, #0x10   ; Lectura del inter
+                                                            ruptor SW1
+   89 00000080 2910            CMP              R1, #0X10
+   90 00000082 D138            BNE              Contador    ; Si se ha presiona
+                                                            do el interruptor S
+                                                            W1 ejecutar Lazo1
+   91 00000084         
+   92 00000084 F8D0 13FC       LDR              R1, [R0,#DATA] ; Registro de Da
+                                                            tos del puerto F
+   93 00000088 F001 0101       AND              R1, #0x01   ; Lectura del inter
+                                                            ruptor SW2
+   94 0000008C 2901            CMP              R1, #0X01
+   95 0000008E D100            BNE              Led         ; Si se ha presiona
+                                                            do el interruptor S
+
+
+
+ARM Macro Assembler    Page 4 
+
+
+                                                            W2 ejecutar Lazo 2
+   96 00000090         
+   97 00000090 E7F1            B                Ciclo
+   98 00000092         
+   99 00000092         ; ****************************************************
+  100 00000092         Led                                  ; *****************
+                                                            *** CONTADOR ******
+                                                            **************** 
+  101 00000092         Led11
+  102 00000092 4821            LDR              R0, GPIO_PORTF_BASE ; Dirección
+                                                             Base del puerto F
+  103 00000094 F8D0 13FC       LDR              R1, [R0,#DATA] ; Registro de Da
+                                                            tos del puerto F
+  104 00000098 F001 0101       AND              R1, #0x01   ; Lectura del inter
+                                                            ruptor SW1
+  105 0000009C 2901            CMP              R1, #0X01
+  106 0000009E D1F8            BNE              Led11       ; Esperar que se su
+                                                            elte el interruptor
+                                                             SW1
+  107 000000A0         
+  108 000000A0         ;PRENDE LED ROJO
+  109 000000A0 481D            LDR              R0, GPIO_PORTF_BASE ; Dirección
+                                                             Base del puerto F
+  110 000000A2 F8D0 13FC       LDR              R1, [R0,#DATA] ; Registro de Da
+                                                            tos del puerto F
+  111 000000A6 F041 0102       ORR              R1, #0x02   ; Activar el MAGENT
+                                                            A
+  112 000000AA F8C0 13FC       STR              R1, [R0,#DATA]
+  113 000000AE         
+  114 000000AE         ;RETARDO
+  115 000000AE         ; Retardo (lo suficiente para apreciarse el parpadeo)
+  116 000000AE F04F 0464       mov              R4, #100
+  117 000000B2         
+  118 000000B2         delay_out11
+  119 000000B2 F242 7310       mov              R3, #10000
+  120 000000B6         delay_in11
+  121 000000B6 F1A3 0301       sub              R3, #1
+  122 000000BA 2B00            cmp              R3, #0
+  123 000000BC D1FB            bne              delay_in11
+  124 000000BE F1A4 0401       sub              R4, #1
+  125 000000C2 2C00            cmp              R4, #0
+  126 000000C4 D1F5            bne              delay_out11
+  127 000000C6         
+  128 000000C6         ;APAGA LED ROJO
+  129 000000C6 4814            LDR              R0, GPIO_PORTF_BASE ; Dirección
+                                                             Base del puerto F
+  130 000000C8 F8D0 13FC       LDR              R1, [R0,#DATA] ; Registro de Da
+                                                            tos del puerto F
+  131 000000CC F021 0102       BIC              R1, #0x02   ; Desactivar el Roj
+                                                            o
+  132 000000D0 F8C0 13FC       STR              R1, [R0,#DATA]
+  133 000000D4         
+  134 000000D4         ;RETARDO
+  135 000000D4         ; Retardo (lo suficiente para apreciarse el parpadeo)
+  136 000000D4 F04F 0464       mov              R4, #100
+  137 000000D8         
+  138 000000D8         delay_out12
+  139 000000D8 F242 7310       mov              R3, #10000
+  140 000000DC         delay_in12
+
+
+
+ARM Macro Assembler    Page 5 
+
+
+  141 000000DC F1A3 0301       sub              R3, #1
+  142 000000E0 2B00            cmp              R3, #0
+  143 000000E2 D1FB            bne              delay_in12
+  144 000000E4 F1A4 0401       sub              R4, #1
+  145 000000E8 2C00            cmp              R4, #0
+  146 000000EA D1F5            bne              delay_out12
+  147 000000EC F1A2 0201       SUB              R2, #1
+  148 000000F0         
+  149 000000F0         ;¿PASO T veces?
+  150 000000F0 2A00            CMP              R2, #0
+  151 000000F2 D1CE            BNE              Led11       ; EJECUTA PARPADEO 
+                                                            DE NUEVO
+  152 000000F4         
+  153 000000F4         
+  154 000000F4 E7BF            B                Ciclo
+  155 000000F6         
+  156 000000F6         ; ****************************************************
+  157 000000F6         Contador                             ; *****************
+                                                            *** CONTADOR ******
+                                                            ****************
+  158 000000F6 F102 0201       ADD              R2,#1
+  159 000000FA         Lazo1b
+  160 000000FA 4807            LDR              R0, GPIO_PORTF_BASE ; Dirección
+                                                             Base del puerto F
+  161 000000FC F8D0 13FC       LDR              R1, [R0,#DATA] ; Registro de Da
+                                                            tos del puerto F
+  162 00000100 F001 0110       AND              R1, #0x10   ; Lectura del inter
+                                                            ruptor SW1
+  163 00000104 2910            CMP              R1, #0X10
+  164 00000106 D1F8            BNE              Lazo1b      ; Esperar que se su
+                                                            elte el interruptor
+                                                             SW1
+  165 00000108 2A0F            CMP              R2, #15
+  166 0000010A D0B2            BEQ              Start2
+  167 0000010C         
+  168 0000010C E7B3            B                Ciclo
+  169 0000010E         
+  170 0000010E         ; ****************************************************
+  171 0000010E         
+  172 0000010E 00 00 400FE608 
+                       RCGCGPIO
+                               DCD              0x400FE608
+  173 00000114 400FEA08 
+                       PRGPIO  DCD              0x400FEA08
+  174 00000118 40025000 
+                       GPIO_PORTF_BASE
+                               DCD              0x40025000
+  175 0000011C 4C4F434B 
+                       KEYLOCK DCD              0x4C4F434B
+  176 00000120         
+  177 00000120                 END
+Command Line: --debug --xref --cpu=Cortex-M4 --apcs=interwork --depend=.\main.d
+ -o.\main.o -IC:\Keil\ARM\RV31\INC -IC:\Keil\ARM\CMSIS\Include -IC:\Keil\ARM\In
+c\TI\TM4C123 --predefine="__EVAL SETA 1" --list=.\main.lst main.s
+
+
+
+ARM Macro Assembler    Page 1 Alphabetic symbol ordering
+Relocatable symbols
+
+Ciclo 00000076
+
+Symbol: Ciclo
+   Definitions
+      At line 84 in file main.s
+   Uses
+      At line 97 in file main.s
+      At line 154 in file main.s
+      At line 168 in file main.s
+
+Contador 000000F6
+
+Symbol: Contador
+   Definitions
+      At line 157 in file main.s
+   Uses
+      At line 90 in file main.s
+Comment: Contador used once
+GPIO_PORTF_BASE 00000118
+
+Symbol: GPIO_PORTF_BASE
+   Definitions
+      At line 174 in file main.s
+   Uses
+      At line 45 in file main.s
+      At line 86 in file main.s
+      At line 102 in file main.s
+      At line 109 in file main.s
+      At line 129 in file main.s
+      At line 160 in file main.s
+
+KEYLOCK 0000011C
+
+Symbol: KEYLOCK
+   Definitions
+      At line 175 in file main.s
+   Uses
+      At line 46 in file main.s
+Comment: KEYLOCK used once
+Lazo1b 000000FA
+
+Symbol: Lazo1b
+   Definitions
+      At line 159 in file main.s
+   Uses
+      At line 164 in file main.s
+Comment: Lazo1b used once
+Led 00000092
+
+Symbol: Led
+   Definitions
+      At line 100 in file main.s
+   Uses
+      At line 95 in file main.s
+Comment: Led used once
+Led11 00000092
+
+Symbol: Led11
+   Definitions
+
+
+
+ARM Macro Assembler    Page 2 Alphabetic symbol ordering
+Relocatable symbols
+
+      At line 101 in file main.s
+   Uses
+      At line 106 in file main.s
+      At line 151 in file main.s
+
+PRGPIO 00000114
+
+Symbol: PRGPIO
+   Definitions
+      At line 173 in file main.s
+   Uses
+      None
+Comment: PRGPIO unused
+RCGCGPIO 00000110
+
+Symbol: RCGCGPIO
+   Definitions
+      At line 172 in file main.s
+   Uses
+      At line 34 in file main.s
+Comment: RCGCGPIO used once
+Start 00000000
+
+Symbol: Start
+   Definitions
+      At line 32 in file main.s
+   Uses
+      At line 30 in file main.s
+Comment: Start used once
+Start2 00000072
+
+Symbol: Start2
+   Definitions
+      At line 81 in file main.s
+   Uses
+      At line 166 in file main.s
+Comment: Start2 used once
+delay_in11 000000B6
+
+Symbol: delay_in11
+   Definitions
+      At line 120 in file main.s
+   Uses
+      At line 123 in file main.s
+Comment: delay_in11 used once
+delay_in12 000000DC
+
+Symbol: delay_in12
+   Definitions
+      At line 140 in file main.s
+   Uses
+      At line 143 in file main.s
+Comment: delay_in12 used once
+delay_out11 000000B2
+
+Symbol: delay_out11
+   Definitions
+      At line 118 in file main.s
+   Uses
+
+
+
+ARM Macro Assembler    Page 3 Alphabetic symbol ordering
+Relocatable symbols
+
+      At line 126 in file main.s
+Comment: delay_out11 used once
+delay_out12 000000D8
+
+Symbol: delay_out12
+   Definitions
+      At line 138 in file main.s
+   Uses
+      At line 146 in file main.s
+Comment: delay_out12 used once
+main 00000000
+
+Symbol: main
+   Definitions
+      At line 28 in file main.s
+   Uses
+      None
+Comment: main unused
+16 symbols
+
+
+
+ARM Macro Assembler    Page 1 Alphabetic symbol ordering
+Absolute symbols
+
+AFSEL 00000420
+
+Symbol: AFSEL
+   Definitions
+      At line 20 in file main.s
+   Uses
+      At line 70 in file main.s
+      At line 72 in file main.s
+
+CR 00000524
+
+Symbol: CR
+   Definitions
+      At line 25 in file main.s
+   Uses
+      At line 49 in file main.s
+      At line 51 in file main.s
+
+DATA 000003FC
+
+Symbol: DATA
+   Definitions
+      At line 18 in file main.s
+   Uses
+      At line 74 in file main.s
+      At line 76 in file main.s
+      At line 87 in file main.s
+      At line 92 in file main.s
+      At line 103 in file main.s
+      At line 110 in file main.s
+      At line 112 in file main.s
+      At line 130 in file main.s
+      At line 132 in file main.s
+      At line 161 in file main.s
+
+DEN 0000051C
+
+Symbol: DEN
+   Definitions
+      At line 23 in file main.s
+   Uses
+      At line 58 in file main.s
+      At line 60 in file main.s
+
+DIR 00000400
+
+Symbol: DIR
+   Definitions
+      At line 19 in file main.s
+   Uses
+      At line 53 in file main.s
+      At line 56 in file main.s
+
+DR8R 00000508
+
+Symbol: DR8R
+   Definitions
+      At line 21 in file main.s
+   Uses
+
+
+
+ARM Macro Assembler    Page 2 Alphabetic symbol ordering
+Absolute symbols
+
+      At line 62 in file main.s
+      At line 64 in file main.s
+
+LOCK 00000520
+
+Symbol: LOCK
+   Definitions
+      At line 24 in file main.s
+   Uses
+      At line 47 in file main.s
+Comment: LOCK used once
+PUR 00000510
+
+Symbol: PUR
+   Definitions
+      At line 22 in file main.s
+   Uses
+      At line 66 in file main.s
+      At line 68 in file main.s
+
+8 symbols
+355 symbols in table

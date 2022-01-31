@@ -1,0 +1,3 @@
+Dependencies for Project 'Ensamblador_Leds', Target 'Ensamblador_Leds': (DO NOT MODIFY !)
+F (.\main.s)(0x615F4779)(--cpu Cortex-M4 --pd "__EVAL SETA 1" -g --apcs=interwork -I C:\Keil\ARM\RV31\INC-I C:\Keil\ARM\CMSIS\Include-I C:\Keil\ARM\Inc\TI\TM4C123--list .\main.lst --xref -o .\main.o --depend .\main.d)
+F (.\StartupASM.s)(0x615EF769)(--cpu Cortex-M4 --pd "__EVAL SETA 1" -g --apcs=interwork -I C:\Keil\ARM\RV31\INC-I C:\Keil\ARM\CMSIS\Include-I C:\Keil\ARM\Inc\TI\TM4C123--list .\startupasm.lst --xref -o .\startupasm.o --depend .\startupasm.d)
