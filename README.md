@@ -1,0 +1,2 @@
+# Microcontroladores-PUCP
+Este repositorio contiene todos los programas desarrollados para el control de un microcontrolador mediante lenguaje C. Incluye un proyecto de la creación de un software para una Estación de Gasolina. Cada laboratorio incluye las especificaciones y requisitos del programa deseado y esta incluido en la misma carpeta. Estos programas forman parte del curso de Sistemas digitales en la Pontificia Universidad Católica del Perú.
